@@ -1,0 +1,57 @@
+#### Resources ####################################################################################################
+Resources:
+  NetbackupGroup:
+    Type: AWS::IAM::Group
+    Properties:
+      GroupName: NetbackupGroup
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonGlacierFullAccess
+      Policies:
+        - PolicyName: NetbackupS3
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+              - s3:CreateBucket
+              - s3:ListAllMyBuckets
+              - s3:ListBucket
+              - s3:GetBucketLocation
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+              - s3:PutObjectTagging
+              Resource: '*'
+
+  NetbackupUser:
+    Type: AWS::IAM::User
+    Properties:
+      Path: '/'
+      Groups:
+        - !Ref NetbackupGroup
+
+  NetbackupUserKey:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: 
+        !Ref NetbackupUser
+
+###############################################################################
+#
+###############################################################################
+
+#### Outputs ####################################################################################################
+Outputs:
+  NetbackupAccessKey:
+    Value:
+      !Ref NetbackupUserKey
+
+  NetbackupAccessSecret:
+    Value: !GetAtt NetbackupUserKey.SecretAccessKey
+  
+  NetbackupUserArn:
+    Value:
+      !GetAtt NetbackupUser.Arn
+    Export:
+      Name: NetbackupUser
